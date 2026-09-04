@@ -239,7 +239,7 @@ class TradeJournal:
         """Get total premiums collected across all trades."""
         cursor = self.conn.cursor()
         cursor.execute(
-            "SELECT COALESCE(SUM(premium), 0) as total FROM trades WHERE action IN ('SELL_PUT', 'SELL_CALL')"
+            "SELECT COALESCE(SUM(premium), 0) as total FROM trades WHERE action IN ('SELL_PUT', 'SELL_CALL', 'OPEN_CONDOR')"
         )
         return float(cursor.fetchone()["total"])
 
