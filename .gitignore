@@ -160,10 +160,8 @@ cython_debug/
 #.idea/
 
 # Custom data ignores
-data/*.db
-data/*.sqlite
-data/*.json
-data/*.csv
+data/
+*.bak
 dashboard/data/
 
 # Agent IDE skills (not project code)
