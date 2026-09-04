@@ -200,7 +200,7 @@ alphawheel/
 
 - **Track**: 04 — Income & Portfolio Overlay Agents
 - **Strategies**: Wheel Strategy (CSP + CC cycle) & 0DTE Iron Condors (SPY)
-- **Alpaca Paper Account ID**: `PA3HG1BVJQ7J`
+- **Alpaca Paper Account ID**: `PA3QPTGUKZ8P`
 - **Technical Write-Up**: [Read the One-Page Write-Up (WRITEUP.md)](WRITEUP.md)
 
 ## 📄 License

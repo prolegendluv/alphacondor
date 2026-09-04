@@ -3,7 +3,7 @@
 
 **Project Title:** AlphaWheel  
 **Track:** 04 — Income & Portfolio Overlay Agents  
-**Paper Trading Account ID:** `PA3HG1BVJQ7J`  
+**Paper Trading Account ID:** `PA3QPTGUKZ8P`  
 **Hackathon:** Alpaca AI Trading Agents Hackathon (lablab.ai)
 
 ---
