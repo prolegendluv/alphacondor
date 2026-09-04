@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlphaCondor — Presentation Deck</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --cyan: #38bdf8;
+      --green: #34d399;
+      --red: #f87171;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .slide-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .slide {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      padding: 3rem 4rem;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+    }
+    h1 { font-size: 2.8rem; font-weight: 800; color: var(--text); margin-bottom: 0.5rem; }
+    h2 { font-size: 2.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+    .subtitle { font-size: 1.2rem; color: var(--cyan); margin-bottom: 1.8rem; font-weight: 500; }
+    .title-highlight { color: var(--cyan); }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.8rem;
+      flex: 1;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+      flex: 1;
+    }
+    .grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1.2rem;
+      flex: 1;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .card.red { border-color: var(--red); }
+    .card.green { border-color: var(--green); }
+    .card.cyan { border-color: var(--cyan); }
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+    .card.red .card-title { color: var(--red); }
+    .card.green .card-title { color: var(--green); }
+    .card.cyan .card-title { color: var(--cyan); }
+    ul { list-style: none; }
+    li {
+      margin-bottom: 0.75rem;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      color: var(--text);
+      position: relative;
+      padding-left: 1.4rem;
+    }
+    li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--cyan);
+      font-weight: bold;
+    }
+    .card.red li::before { color: var(--red); }
+    .card.green li::before { color: var(--green); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    th { background: #1a2333; color: var(--cyan); font-weight: 600; border-bottom: 1px solid var(--border); }
+    tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+    td { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .stat-box {
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .stat-num { font-size: 2.8rem; font-weight: 800; }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 2rem;
+      background: #090e17;
+      border-top: 1px solid var(--border);
+    }
+    .btn {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn:hover { background: var(--border); }
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.8rem;
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="slide-container">
+
+    <!-- SLIDE 1 -->
+    <div class="slide active">
+      <div style="margin-top: auto; margin-bottom: auto; max-width: 900px;">
+        <span class="badge">🏆 Alpaca AI Trading Agents Hackathon — Track 04</span>
+        <h1 style="font-size: 4rem; line-height: 1.1;"><span class="title-highlight">AlphaCondor</span></h1>
+        <p style="font-size: 1.8rem; font-weight: 600; margin: 1rem 0; color: var(--text);">
+          Autonomous AI Options Trading System on Alpaca
+        </p>
+        <p style="font-size: 1.2rem; color: var(--muted); line-height: 1.6; margin-bottom: 2rem;">
+          Coupling Google Gemini 3.5 reasoning with deterministic mathematical risk guardrails.<br>
+          Operates an institutional Wheel income strategy paired with high-efficiency 0DTE Iron Condors.
+        </p>
+        <div class="card" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.85rem; color: var(--muted); text-transform: uppercase;">Competition Paper Account</div>
+            <div style="font-size: 1.3rem; font-weight: 700; color: var(--cyan);">PA3QPTGUKZ8P ($100,000 Equity)</div>
+          </div>
+          <div>
+            <div style="font-size: 0.85rem; color: var(--muted); text-transform: uppercase;">Public Repository</div>
+            <div style="font-size: 1.1rem; font-weight: 600; color: var(--green);">github.com/prolegendluv/alphacondor</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide">
+      <h2>The Options Dilemma & The Solution</h2>
+      <div class="subtitle">Why traditional options trading fails retail, and how AlphaCondor fixes it</div>
+      <div class="grid-2">
+        <div class="card red">
+          <div class="card-title">❌ The Retail Options Problem</div>
+          <ul>
+            <li><strong>Massive Capital Lockup:</strong> Single Cash-Secured Puts on blue chips require $30,000–$60,000 in cash collateral per contract for small yields.</li>
+            <li><strong>Uncontrolled LLM Hallucinations:</strong> Directly giving an LLM broker access leads to catastrophic mis-sizings and illegal naked trades.</li>
+            <li><strong>Rapid Intraday Gamma:</strong> 0DTE options offer explosive decay but severe tail risks without automated intraday stops.</li>
+            <li><strong>Tooling Fragmentation:</strong> Retail lacks multi-leg atomic routing and continuous audit logging.</li>
+          </ul>
+        </div>
+        <div class="card green">
+          <div class="card-title">✅ The AlphaCondor Solution</div>
+          <ul>
+            <li><strong>Strict AI/Risk Decoupling:</strong> Google Gemini serves as an analyst and advisor. A deterministic Python firewall validates every order.</li>
+            <li><strong>Dual-Strategy Engine:</strong> Wheel strategy on blue-chips + defined-risk 0DTE Iron Condors on SPY ($500 margin).</li>
+            <li><strong>7 Deterministic Risk Gates:</strong> Strict mathematical verification of collateral, concentration limits, and covered share backing.</li>
+            <li><strong>Institutional Observability:</strong> Real-time WebSocket execution, full SQLite audit journal, CLI, and Streamlit dashboard.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide">
+      <h2>System Architecture & Pipeline</h2>
+      <div class="subtitle">End-to-end execution flow from market perception to broker execution</div>
+      <div class="grid-5">
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">1. Perception</div>
+          <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Alpaca Developer API</p>
+          <ul>
+            <li>OHLCV daily bars</li>
+            <li>Live stock quotes</li>
+            <li>Option chains with Greeks</li>
+            <li>Alpaca NewsClient</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">2. Analytics</div>
+          <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Quantitative Layer</p>
+          <ul>
+            <li>Wilder's RSI(14)</li>
+            <li>20/50/200 EMAs & ATR</li>
+            <li>Black-Scholes IV Rank</li>
+            <li>Spread filters (<15%)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">3. AI Cognition</div>
+          <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Google Gemini</p>
+          <ul>
+            <li>Context bundle synthesis</li>
+            <li>Pydantic JSON schema</li>
+            <li>Confidence calibrated</li>
+            <li>Rule-based fallback</li>
+          </ul>
+        </div>
+        <div class="card green">
+          <div class="card-title" style="color: var(--green);">4. Risk Firewall</div>
+          <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">7 Mathematical Gates</p>
+          <ul>
+            <li>Confidence floor (70%)</li>
+            <li>100% Cash collateral</li>
+            <li>Covered call share check</li>
+            <li>Concurrency & delta caps</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">5. Execution</div>
+          <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Broker & WebSockets</p>
+          <ul>
+            <li>Limit orders with Intent</li>
+            <li>4-leg Condor routing</li>
+            <li>TradingStream fills</li>
+            <li>SQLite audit log</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide">
+      <h2>Dual Options Strategy Engine</h2>
+      <div class="subtitle">Balancing institutional stability with maximum capital efficiency</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">🎡 Strategy 1: The Core Wheel</div>
+          <ul>
+            <li><strong>Universe:</strong> Mega-caps & indices (AAPL, MSFT, NVDA, SOFI, SPY).</li>
+            <li><strong>Phase 1 (CSP):</strong> Sells OTM puts (Δ ≈ 0.25, 30–45 DTE) on fundamentally sound companies.</li>
+            <li><strong>Phase 2 (Assignment):</strong> If assigned, takes 100 shares at strike, lowering cost basis by premium collected.</li>
+            <li><strong>Phase 3 (Covered Call):</strong> Sells OTM calls against held shares to harvest cash flow until called away.</li>
+            <li><strong>Target Yield:</strong> 20%–35% annualized options income.</li>
+          </ul>
+        </div>
+        <div class="card green">
+          <div class="card-title" style="color: var(--green);">🦅 Strategy 2: 0DTE Iron Condor</div>
+          <ul>
+            <li><strong>Universe:</strong> SPY (highest liquidity broad market ETF).</li>
+            <li><strong>Defined-Risk Spread:</strong> Buy Put + Sell Put + Sell Call + Buy Call.</li>
+            <li><strong>10x–20x Margin Efficiency:</strong> Required margin is capped at spread width ($500/spread) vs $30,000+ for single puts.</li>
+            <li><strong>Rapid Theta Capture:</strong> Exploits extreme same-day expiration decay curve.</li>
+            <li><strong>Backtest Performance:</strong> Up to 21x higher 4-day P&L potential ($2,400–$7,500 vs $350) with identical $100K capital.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide">
+      <h2>The 7 Deterministic Risk Gates</h2>
+      <div class="subtitle">Zero LLM involvement in risk decisions — pure algorithmic validation</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Risk Gate</th>
+            <th>Target Objective</th>
+            <th>Mathematical Rule</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Confidence Floor</strong></td>
+            <td>Model Certainty</td>
+            <td>Hard rejection if AI confidence score &lt; 70%</td>
+          </tr>
+          <tr>
+            <td><strong>2. Concurrency Cap</strong></td>
+            <td>Portfolio Capacity</td>
+            <td>Maximum 20 simultaneous active option positions</td>
+          </tr>
+          <tr>
+            <td><strong>3. Cash Collateral</strong></td>
+            <td>Cash-Secured Check</td>
+            <td>Requires 100% cash backing: Strike × 100 × Qty ≤ Available Cash</td>
+          </tr>
+          <tr>
+            <td><strong>4. Concentration Cap</strong></td>
+            <td>Single Ticker Limit</td>
+            <td>Position collateral cannot exceed max portfolio allocation percentage</td>
+          </tr>
+          <tr>
+            <td><strong>5. Share Backing</strong></td>
+            <td>Covered Call Protection</td>
+            <td>Requires ≥ 100 shares owned. Naked calls are mathematically impossible</td>
+          </tr>
+          <tr>
+            <td><strong>6. Phase Consistency</strong></td>
+            <td>State Machine Rule</td>
+            <td>Enforces valid transitions (cannot sell call without shares; no duplicate puts)</td>
+          </tr>
+          <tr>
+            <td><strong>7. Liquidity & Spread</strong></td>
+            <td>Execution Quality</td>
+            <td>Rejects options with bid-ask spread &gt; 15% or prices ≤ $0.05</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide">
+      <h2>Intelligent Position Management</h2>
+      <div class="subtitle">Automated rules protecting capital throughout the option lifecycle</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="color: var(--green);">🎯 50% Profit Target Take</div>
+          <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6;">
+            Automatically buys to close open positions once 50% of maximum potential profit is captured. Accelerates capital turnover and eliminates long-tail holding risk.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">⏳ 21 DTE Gamma Roll Rule</div>
+          <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6;">
+            Option gamma accelerates sharply during the final 3 weeks. Positions reaching 21 DTE are automatically rolled out or closed to prevent assignment volatility.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--red);">🛡️ 200% Premium Stop Loss</div>
+          <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6;">
+            If market movements push a position into an unrealized loss exceeding 200% of received premium, the position is immediately liquidated to protect capital.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">⏰ 3:45 PM EOD Forced Exit</div>
+          <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6;">
+            For 0DTE Iron Condors on SPY, any remaining open spreads are closed 15 minutes before the 4:00 PM ET close to guarantee zero overnight risk or after-hours assignment.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide">
+      <h2>Alpaca Developer Stack Integration</h2>
+      <div class="subtitle">Full-spectrum integration across Alpaca's programmable ecosystem</div>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">Alpaca Trading API</div>
+          <p style="color: var(--muted); font-size: 0.9rem; line-height: 1.5;">
+            Order submission via <code>alpaca-py</code> using explicit <code>PositionIntent</code> flags. Continuous account balance and buying power synchronization.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">Alpaca Market Data</div>
+          <p style="color: var(--muted); font-size: 0.9rem; line-height: 1.5;">
+            Live quotes, historical OHLCV bars, option chains with Black-Scholes Greeks, and company news headlines via <code>NewsClient</code>.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">TradingStream WebSockets</div>
+          <p style="color: var(--muted); font-size: 0.9rem; line-height: 1.5;">
+            Event-driven asynchronous order monitor that detects order fills, rejections, and cancellations in real time without polling.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">Alpaca MCP Server</div>
+          <p style="color: var(--muted); font-size: 0.9rem; line-height: 1.5;">
+            Configured in <code>mcp_config.json</code> with <code>uvx alpaca-mcp-server</code>, enabling Claude and Cursor to inspect account status conversationally.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">Streamlit Web Dashboard</div>
+          <p style="color: var(--muted); font-size: 0.9rem; line-height: 1.5;">
+            Real-time web monitoring interface featuring KPI cards, open position tables, recent trade histories, and equity curve charts.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: var(--cyan);">Rich CLI & SQLite Log</div>
+          <p style="color: var(--muted); font-size: 0.9rem; line-height: 1.5;">
+            Comprehensive terminal CLI (<code>alphawheel run / status / history / condor</code>) and relational audit trail storing every agent decision.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide">
+      <h2>Results, Testing & Verification</h2>
+      <div class="subtitle">Complete hackathon submission deliverables verified and ready</div>
+      <div class="grid-3" style="margin-bottom: 1.5rem;">
+        <div class="card stat-box green">
+          <div class="stat-num" style="color: var(--green);">19 / 19</div>
+          <div style="font-weight: 700; margin: 0.4rem 0;">Unit Tests Passing</div>
+          <div style="font-size: 0.85rem; color: var(--muted);">Full coverage of IV Rank, strikes, Wheel states, & Condor engine</div>
+        </div>
+        <div class="card stat-box cyan">
+          <div class="stat-num" style="color: var(--cyan);">$100,000</div>
+          <div style="font-weight: 700; margin: 0.4rem 0;">Fresh Paper Account</div>
+          <div style="font-size: 0.85rem; color: var(--muted);">Account ID PA3QPTGUKZ8P ready for competition judging</div>
+        </div>
+        <div class="card stat-box" style="border-color: #facc15;">
+          <div class="stat-num" style="color: #facc15;">7x – 21x</div>
+          <div style="font-weight: 700; margin: 0.4rem 0;">Margin Efficiency</div>
+          <div style="font-size: 0.85rem; color: var(--muted);">Demonstrated P&L expansion on SPY spreads vs single puts</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color: var(--cyan); margin-bottom: 0.5rem;">Summary of Deliverables</div>
+        <ul style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+          <li>Public GitHub Repo: <code>prolegendluv/alphacondor</code></li>
+          <li>Interactive Streamlit Web Dashboard: <code>localhost:8501</code></li>
+          <li>One-Page Technical Write-Up: <code>WRITEUP.md</code></li>
+          <li>Dedicated Alpaca Competition Account: <code>PA3QPTGUKZ8P</code></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <button class="btn" onclick="prevSlide()">◀ Previous (Left Arrow)</button>
+    <div style="color: var(--muted); font-size: 0.95rem;" id="slide-num">Slide 1 of 8</div>
+    <button class="btn" onclick="nextSlide()">Next (Right Arrow) ▶</button>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const slideNum = document.getElementById('slide-num');
+
+    function showSlide(index) {
+      slides[currentSlide].classList.remove('active');
+      currentSlide = (index + slides.length) % slides.length;
+      slides[currentSlide].classList.add('active');
+      slideNum.textContent = `Slide ${currentSlide + 1} of ${slides.length}`;
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      }
+    });
+  </script>
+</body>
+</html>
