@@ -1,7 +1,7 @@
-# 📄 AlphaWheel: Technical Write-Up
+# 📄 AlphaCondor: Technical Write-Up
 ## Autonomous AI Options Trading System on Alpaca
 
-**Project Title:** AlphaWheel  
+**Project Title:** AlphaCondor  
 **Track:** 04 — Income & Portfolio Overlay Agents  
 **Paper Trading Account ID:** `PA3QPTGUKZ8P`  
 **Hackathon:** Alpaca AI Trading Agents Hackathon (lablab.ai)
@@ -10,7 +10,7 @@
 
 ### 1. Executive Summary & Architecture
 
-**AlphaWheel** is an autonomous, production-grade algorithmic options trading agent built on Alpaca's developer platform. It operates a **dual-strategy options income engine**:
+**AlphaCondor** is an autonomous, production-grade algorithmic options trading agent built on Alpaca's developer platform. It operates a **dual-strategy options income engine**:
 1. **The Core Wheel Strategy (Cash-Secured Puts ↔ Covered Calls)**: Generates steady theta decay across blue-chip equities (`AAPL`, `MSFT`, `NVDA`, `SOFI`, `SPY`).
 2. **0DTE Iron Condors (SPY)**: Provides 10x–20x greater margin efficiency by trading defined-risk 4-leg credit spreads with rapid intraday theta decay.
 

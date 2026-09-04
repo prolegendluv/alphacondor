@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlphaCondor — Technical Write-Up Report</title>
+  <style>
+    @media print {
+      body { background: white !important; color: #111 !important; }
+      .no-print { display: none !important; }
+      .page-break { page-break-before: always; }
+      .card { border: 1px solid #ccc !important; background: #fff !important; }
+      th { background: #eee !important; color: #000 !important; }
+    }
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --cyan: #0284c7;
+      --green: #059669;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f8fafc;
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      padding: 3rem 3.5rem;
+    }
+    header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+    h1 {
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      background: #f1f5f9;
+      padding: 1rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+    .meta-item strong { display: block; color: #475569; font-size: 0.8rem; text-transform: uppercase; }
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #0f172a;
+      border-left: 4px solid var(--cyan);
+      padding-left: 0.75rem;
+      margin: 2.2rem 0 1rem 0;
+    }
+    p { margin-bottom: 1rem; font-size: 0.98rem; }
+    ul { margin: 0 0 1.2rem 1.5rem; }
+    li { margin-bottom: 0.4rem; font-size: 0.95rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.2rem 0 1.8rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 0.9rem;
+      text-align: left;
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #334155;
+    }
+    tr:nth-child(even) { background: #fcfcfc; }
+    .diagram-box {
+      background: #0f172a;
+      color: #38bdf8;
+      font-family: monospace;
+      padding: 1.2rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 1.2rem 0;
+      line-height: 1.4;
+    }
+    .btn-print {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 0.7rem 1.3rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.4);
+      transition: background 0.2s;
+    }
+    .btn-print:hover { background: #0369a1; }
+  </style>
+</head>
+<body>
+
+  <button class="btn-print no-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+
+  <div class="container">
+    <header>
+      <span class="badge">Alpaca AI Trading Agents Hackathon — Track 04</span>
+      <h1>AlphaCondor: Technical Report & Architecture Write-Up</h1>
+      <div class="subtitle">Autonomous AI Options Trading System on Alpaca Developer Platform</div>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <strong>Project Title</strong>
+          AlphaCondor
+        </div>
+        <div class="meta-item">
+          <strong>Competition Account ID</strong>
+          PA3QPTGUKZ8P ($100,000 Starting Equity)
+        </div>
+        <div class="meta-item">
+          <strong>GitHub Repository</strong>
+          prolegendluv/alphacondor
+        </div>
+      </div>
+    </header>
+
+    <h2>1. Executive Summary & Core Philosophy</h2>
+    <p>
+      <strong>AlphaCondor</strong> is an autonomous, production-grade algorithmic options trading agent designed for Alpaca's developer platform. It operates a <strong>dual-strategy options income engine</strong>:
+    </p>
+    <ul>
+      <li><strong>The Core Wheel Strategy (Cash-Secured Puts ↔ Covered Calls):</strong> Systematic cash-secured options writing across fundamentally sound blue chips (<code>AAPL</code>, <code>MSFT</code>, <code>NVDA</code>, <code>SOFI</code>, <code>SPY</code>) targeting 20%–35% annualized theta decay.</li>
+      <li><strong>0DTE Iron Condors (SPY):</strong> High-capital-efficiency defined-risk credit spreads exploiting rapid same-day expiration decay with 10x–20x lower margin requirements ($500 spread margin vs. $30,000+ per CSP contract).</li>
+    </ul>
+    <p>
+      The foundational design principle is the <strong>strict decoupling of Generative AI cognition from deterministic risk enforcement</strong>. An LLM acts as an <em>advisor and analyst</em>, while an immutable Python mathematical layer acts as the <em>execution firewall</em>.
+    </p>
+
+    <div class="diagram-box">
+┌────────────────────────────────────────────────────────────────────────┐
+│                     Alpaca Developer Ecosystem                         │
+│       Trading API  |  Market Data API  |  TradingStream WebSockets     │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                    ┌───────────────▼───────────────┐
+                    │       Perception Layer        │
+                    │   Historical Bars & Quotes    │
+                    │   Option Chains with Greeks   │
+                    │   Alpaca Real-time News API   │
+                    └───────────────┬───────────────┘
+                                    │
+                    ┌───────────────▼───────────────┐
+                    │      AI Cognitive Engine      │
+                    │  Google Gemini (Pydantic JSON)│
+                    │  Technical Analysis Synthesis │
+                    └───────────────┬───────────────┘
+                                    │
+                    ┌───────────────▼───────────────┐
+                    │   7 Deterministic Risk Gates  │
+                    │   Cash Collateral Validation  │
+                    │   Share-Backing Verification  │
+                    │   Concentration & Delta Caps  │
+                    └───────────────┬───────────────┘
+                                    │
+                    ┌───────────────▼───────────────┐
+                    │    Broker Execution Engine    │
+                    │   Limit Orders with Intent    │
+                    │   Multi-Leg Condor Router     │
+                    │   Event-Driven Fill Monitor   │
+                    └───────────────────────────────┘
+    </div>
+
+    <h2>2. AI Cognition & Reasoning Layer</h2>
+    <p>
+      The cognitive engine utilizes <strong>Google Gemini</strong> (<code>gemini-3.5-flash-lite</code>) via the modern <code>google-genai</code> SDK.
+    </p>
+    <ul>
+      <li><strong>Context Bundle Synthesis:</strong> Prior to reasoning, the perception engine aggregates Wilder's RSI(14), 20/50/200 EMAs, ATR-14, Bollinger Bands, Black-Scholes IV Rank, top candidate option contracts, and news sentiment into a dense structured context.</li>
+      <li><strong>Strict Schema Enforcement:</strong> The prompt mandates a strict Pydantic JSON schema (<code>OptionTradeSignal</code>) guaranteeing machine-parseable outputs containing proposed action, target strike, DTE, limit price, confidence score (0.0–1.0), and natural language rationale.</li>
+      <li><strong>Failsafe Offline Fallback:</strong> In the event of API timeout or network partition, the agent automatically falls back to an internal quantitative ruleset without crashing or halting active position monitoring.</li>
+    </ul>
+
+    <h2>3. The 7 Deterministic Risk Gates (The Safety Firewall)</h2>
+    <p>
+      Generative models can hallucinate strikes or propose dangerous leverage. AlphaCondor eliminates this risk by mandating that <strong>every AI trade signal must pass 7 immutable mathematical checks</strong> before broker submission:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Gate</th>
+          <th>Verification Target</th>
+          <th>Mathematical Enforcement</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Confidence Floor</strong></td>
+          <td>Model Certainty</td>
+          <td>Rejects any trade where AI confidence is below 70%.</td>
+        </tr>
+        <tr>
+          <td><strong>2. Concurrency Cap</strong></td>
+          <td>Portfolio Capacity</td>
+          <td>Limits simultaneous active option positions to a maximum of 20.</td>
+        </tr>
+        <tr>
+          <td><strong>3. Cash Collateral</strong></td>
+          <td>Cash-Secured Check</td>
+          <td>Guarantees 100% cash backing for puts: $\text{Strike} \times 100 \times \text{Qty} \le \text{Cash}$.</td>
+        </tr>
+        <tr>
+          <td><strong>4. Concentration Cap</strong></td>
+          <td>Single Ticker Limit</td>
+          <td>Restricts individual underlying allocation to a configured portfolio percentage.</td>
+        </tr>
+        <tr>
+          <td><strong>5. Share Backing</strong></td>
+          <td>Covered Call Rule</td>
+          <td>Requires holding $\ge 100$ shares of underlying. Naked calls are mathematically impossible.</td>
+        </tr>
+        <tr>
+          <td><strong>6. Phase Consistency</strong></td>
+          <td>Wheel State Machine</td>
+          <td>Enforces strict state transitions (cannot sell call without shares; cannot duplicate open puts).</td>
+        </tr>
+        <tr>
+          <td><strong>7. Liquidity & Spread</strong></td>
+          <td>Execution Quality</td>
+          <td>Filters illiquid options with bid-ask spread &gt; 15% or prices $\le \$0.05$.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Automated Position Lifecycle Management</h2>
+    <ul>
+      <li><strong>50% Profit Target:</strong> Automatically submits buy-to-close orders once 50% of the maximum credit is captured, accelerating capital velocity and avoiding long-tail tail risk.</li>
+      <li><strong>21 DTE Gamma Roll Rule:</strong> Closes or rolls open monthly contracts at 21 DTE to eliminate exponential assignment volatility.</li>
+      <li><strong>200% Stop Loss:</strong> Caps catastrophic downside by liquidating positions if unrealized losses exceed 200% of received premium.</li>
+      <li><strong>3:45 PM EOD Forced Exit:</strong> Closes 0DTE Iron Condors 15 minutes before market close to eliminate after-hours pin risk.</li>
+    </ul>
+
+    <h2>5. Alpaca Developer Stack Integration</h2>
+    <ul>
+      <li><strong>Alpaca Trading API (<code>alpaca-py</code>):</strong> Native order routing with explicit <code>PositionIntent</code> (<code>SELL_TO_OPEN</code>, <code>BUY_TO_CLOSE</code>, <code>BUY_TO_OPEN</code>, <code>SELL_TO_CLOSE</code>).</li>
+      <li><strong>Alpaca Market Data API:</strong> Historical daily bars, stock quotes, and option chains with analytical Greeks.</li>
+      <li><strong>Alpaca TradingStream:</strong> Asynchronous WebSocket client streaming real-time trade fills and cancellations.</li>
+      <li><strong>Alpaca MCP Server:</strong> Configured via <code>mcp_config.json</code> running <code>uvx alpaca-mcp-server</code> for Claude/Cursor conversational trading.</li>
+      <li><strong>Streamlit Web Dashboard:</strong> Real-time portfolio monitoring, open positions table, trade history, and equity curve (<code>localhost:8501</code>).</li>
+      <li><strong>Rich CLI:</strong> Terminal management with <code>alphawheel run / status / history / analyze / condor</code>.</li>
+    </ul>
+  </div>
+</body>
+</html>
