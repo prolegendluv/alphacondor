@@ -26,7 +26,7 @@ from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
 
 # Configuration
-DB_PATH = Path("e:/alpaca/data/alphawheel.db")
+DB_PATH = Path(__file__).resolve().parent.parent / "data" / "alphawheel.db"
 API_KEY = "PKUORT3YYHNZ4HXWT34KIN2B52"
 SECRET_KEY = "GVkwxEBRUFVnH543S7h4S3q4YxxdtZG1WfSbX1bpRhGR"
 START_DATE = datetime(2024, 1, 1)

@@ -6,9 +6,12 @@ Real-time portfolio monitoring, trade history, and agent analytics.
 import sys
 from pathlib import Path
 
-# Add project src to path
+# Add project src and root to path
 project_root = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(project_root / "src"))
+if str(project_root / "src") not in sys.path:
+    sys.path.insert(0, str(project_root / "src"))
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 import streamlit as st
 import pandas as pd
@@ -16,55 +19,73 @@ import json
 from datetime import datetime
 
 st.set_page_config(
-    page_title="AlphaWheel Dashboard",
-    page_icon="⚙️",
+    page_title="AlphaCondor Dashboard",
+    page_icon="🦅",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 
 def load_settings():
-    """Load settings."""
+    """Load settings with robust fallbacks for cloud deployment."""
     try:
         from alphawheel.config import get_settings
         return get_settings()
     except Exception as e:
-        st.error(f"Failed to load settings: {e}")
-        st.info("Make sure you have a .env file with your API keys.")
-        st.stop()
+        st.warning(f"Settings loaded in standalone demo mode: {e}")
+        from alphawheel.config import AlphaWheelSettings
+        return AlphaWheelSettings()
 
 
 def main():
-    st.title("⚙️ AlphaWheel Dashboard")
-    st.caption("Autonomous AI Options Trading Agent (Wheel Strategy + 0DTE Iron Condor)")
+    st.title("🦅 AlphaCondor Dashboard")
+    st.caption("Autonomous AI Options Trading Agent (0DTE Iron Condor + Wheel CSP/CC)")
 
     settings = load_settings()
 
     # Sidebar
     with st.sidebar:
         st.header("Strategy Settings")
-        st.subheader("🎡 Wheel Strategy")
+        st.subheader("🦅 0DTE Iron Condor (SPY)")
+        st.write(f"**Underlying:** SPY")
+        st.write(f"**Wing Width:** ${settings.condor_wing_width}")
+        st.write(f"**Target Delta:** {settings.condor_target_delta}")
+        st.write(f"**Profit Target:** {settings.condor_profit_target_pct:.0%}")
+        st.write(f"**Stop Loss:** {settings.condor_stop_loss_pct:.0%}")
+        st.write(f"**Exit Time:** {settings.condor_close_before_minutes}m before close")
+
+        st.subheader("🎡 Core Wheel Strategy")
         st.write(f"**Universe:** {', '.join(settings.universe[:5])}")
         st.write(f"**Target Delta:** {settings.target_delta}")
         st.write(f"**DTE Range:** {settings.min_dte}–{settings.max_dte} DTE")
         st.write(f"**Profit Target:** {settings.profit_target_pct:.0%}")
         st.write(f"**Max Positions:** {settings.max_concurrent_positions}")
 
-        st.subheader("🦅 0DTE Iron Condor")
-        st.write(f"**Underlying:** SPY")
-        st.write(f"**Wing Width:** ${settings.condor_wing_width}")
-        st.write(f"**Target Delta:** {settings.condor_target_delta}")
-        st.write(f"**Profit Target:** {settings.condor_profit_target_pct:.0%}")
-        st.write(f"**Stop Loss:** {settings.condor_stop_loss_pct:.0%}")
-
         if st.button("🔄 Refresh Data"):
             st.rerun()
 
+    # Ensure database path is resolved
+    db_path = settings.db_path
+    if not db_path.is_absolute():
+        db_path = project_root / db_path
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+
     # Load journal data
     from alphawheel.journal.trade_log import TradeJournal
-    journal = TradeJournal(settings.db_path)
-    total_premiums = journal.get_total_premiums()
+    journal = TradeJournal(db_path)
     history_list = journal.get_portfolio_history(limit=1000)
+
+    # If database is empty (e.g. fresh clone), auto-populate from historical backtest engine
+    if not history_list:
+        try:
+            from scripts.backtest_populate import run_backtest_and_populate
+            run_backtest_and_populate()
+            journal = TradeJournal(db_path)
+            history_list = journal.get_portfolio_history(limit=1000)
+        except Exception:
+            pass
+
+    total_premiums = journal.get_total_premiums()
 
     # Latest backtest metrics
     if history_list:
@@ -107,11 +128,11 @@ def main():
 
     with tab1:
         st.subheader("Active Positions")
-        pos_toggle = st.radio(
-            "Select View:",
-            ["Strategy Active Positions (Wheel & 0DTE Condor)", "Alpaca Live Paper Account"],
-            horizontal=True
-        )
+        view_options = ["Strategy Active Positions (Wheel & 0DTE Condor)", "Alpaca Live Paper Account"]
+        if hasattr(st, "segmented_control"):
+            pos_toggle = st.segmented_control("Select View:", view_options, default=view_options[0]) or view_options[0]
+        else:
+            pos_toggle = st.radio("Select View:", view_options, horizontal=True)
 
         if pos_toggle == "Strategy Active Positions (Wheel & 0DTE Condor)":
             active_data = [
@@ -122,7 +143,7 @@ def main():
                 {"Symbol": "AAPL260918P00225000", "Strategy": "Wheel Phase 1 (CSP)", "Qty": -1, "Entry": "$3.40", "Current": "$1.70", "P&L": "+$170.00", "P&L %": "+50.0%", "Side": "Short", "Status": "50% Target Met"},
                 {"Symbol": "SOFI260918P00017500", "Strategy": "Wheel Phase 1 (CSP)", "Qty": -5, "Entry": "$0.65", "Current": "$0.32", "P&L": "+$165.00", "P&L %": "+50.8%", "Side": "Short", "Status": "50% Target Met"},
             ]
-            st.dataframe(pd.DataFrame(active_data), use_container_width=True, hide_index=True)
+            st.dataframe(pd.DataFrame(active_data), hide_index=True)
         else:
             if portfolio and portfolio.positions:
                 positions_data = []
@@ -137,7 +158,7 @@ def main():
                         "Side": pos.side,
                         "Type": pos.asset_class,
                     })
-                st.dataframe(pd.DataFrame(positions_data), use_container_width=True, hide_index=True)
+                st.dataframe(pd.DataFrame(positions_data), hide_index=True)
             else:
                 st.info("No open positions on live Alpaca broker yet. Run 'alphawheel condor' or 'alphawheel run' to enter live positions.")
 
@@ -157,7 +178,7 @@ def main():
             df = pd.DataFrame(trades)
             display_cols = ["timestamp", "underlying", "action", "symbol", "side", "qty", "price", "premium", "status", "rationale"]
             available_cols = [c for c in display_cols if c in df.columns]
-            st.dataframe(df[available_cols], use_container_width=True, hide_index=True)
+            st.dataframe(df[available_cols], hide_index=True)
         else:
             st.info("No trades recorded yet. Run the agent to start trading.")
 
@@ -181,7 +202,7 @@ def main():
                     "Executed": "✅" if d["was_executed"] else "❌",
                     "AI Rationale": rationale_text[:80] + ("..." if len(rationale_text) > 80 else ""),
                 })
-            st.dataframe(pd.DataFrame(decision_data), use_container_width=True, hide_index=True)
+            st.dataframe(pd.DataFrame(decision_data), hide_index=True)
         else:
             st.info("No decisions recorded yet.")
 
@@ -190,7 +211,7 @@ def main():
         history = journal.get_portfolio_history(limit=1000)
         if history:
             df = pd.DataFrame(history)
-            df["timestamp"] = pd.to_datetime(df["timestamp"])
+            df["timestamp"] = pd.to_datetime(df["timestamp"], format="ISO8601")
             
             start_eq = float(df["equity"].iloc[0])
             end_eq = float(df["equity"].iloc[-1])
@@ -215,7 +236,7 @@ def main():
 
     # Footer
     st.divider()
-    st.caption(f"AlphaWheel v0.1.0 | Last refresh: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    st.caption(f"AlphaCondor v0.1.0 | Alpaca Paper ID: {settings.alpaca_api_key[:6]}... | Last refresh: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
 if __name__ == "__main__":

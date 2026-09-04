@@ -16,8 +16,14 @@ class AlphaWheelSettings(BaseSettings):
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     # Alpaca API
-    alpaca_api_key: str = Field(..., description="Alpaca API Key ID")
-    alpaca_secret_key: str = Field(..., description="Alpaca API Secret Key")
+    alpaca_api_key: str = Field(
+        default_factory=lambda: os.getenv("ALPACA_API_KEY", "PKUORT3YYHNZ4HXWT34KIN2B52"),
+        description="Alpaca API Key ID",
+    )
+    alpaca_secret_key: str = Field(
+        default_factory=lambda: os.getenv("ALPACA_SECRET_KEY", "GVkwxEBRUFVnH543S7h4S3q4YxxdtZG1WfSbX1bpRhGR"),
+        description="Alpaca API Secret Key",
+    )
     alpaca_paper: bool = Field(True, description="Use paper trading environment")
 
     # LLM
@@ -73,6 +79,18 @@ class AlphaWheelSettings(BaseSettings):
 
 def get_settings() -> AlphaWheelSettings:
     """Load and return application settings."""
+    # Check streamlit secrets if running inside Streamlit Cloud
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets"):
+            for k in ["ALPACA_API_KEY", "ALPACA_SECRET_KEY", "GOOGLE_API_KEY", "ALPACA_PAPER"]:
+                if k in st.secrets:
+                    os.environ.setdefault(k, str(st.secrets[k]))
+                elif k.lower() in st.secrets:
+                    os.environ.setdefault(k, str(st.secrets[k.lower()]))
+    except Exception:
+        pass
+
     # Try loading .env from project root
     env_path = Path(__file__).resolve().parents[2] / ".env"
     if env_path.exists():
