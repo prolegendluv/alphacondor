@@ -35,18 +35,26 @@ def load_settings():
 
 def main():
     st.title("⚙️ AlphaWheel Dashboard")
-    st.caption("Autonomous AI Wheel Strategy Trading Agent")
+    st.caption("Autonomous AI Options Trading Agent (Wheel Strategy + 0DTE Iron Condor)")
 
     settings = load_settings()
 
     # Sidebar
     with st.sidebar:
-        st.header("Configuration")
+        st.header("Strategy Settings")
+        st.subheader("🎡 Wheel Strategy")
         st.write(f"**Universe:** {', '.join(settings.universe[:5])}")
         st.write(f"**Target Delta:** {settings.target_delta}")
-        st.write(f"**DTE Range:** {settings.min_dte}-{settings.max_dte}")
+        st.write(f"**DTE Range:** {settings.min_dte}–{settings.max_dte} DTE")
         st.write(f"**Profit Target:** {settings.profit_target_pct:.0%}")
         st.write(f"**Max Positions:** {settings.max_concurrent_positions}")
+
+        st.subheader("🦅 0DTE Iron Condor")
+        st.write(f"**Underlying:** SPY")
+        st.write(f"**Wing Width:** ${settings.condor_wing_width}")
+        st.write(f"**Target Delta:** {settings.condor_target_delta}")
+        st.write(f"**Profit Target:** {settings.condor_profit_target_pct:.0%}")
+        st.write(f"**Stop Loss:** {settings.condor_stop_loss_pct:.0%}")
 
         if st.button("🔄 Refresh Data"):
             st.rerun()

@@ -27,7 +27,7 @@ Scheduler (APScheduler)
     │   └── News Headlines
     │
     ├── Analysis Engine
-    │   ├── Technical Indicators (pandas-ta)
+    │   ├── Technical Indicators (pandas + numpy)
     │   ├── IV Rank & Options Analytics
     │   └── Sentiment Scoring (Gemini)
     │
