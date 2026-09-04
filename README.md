@@ -53,8 +53,8 @@ Scheduler (APScheduler)
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/alphawheel.git
-cd alphawheel
+git clone https://github.com/prolegendluv/alphacondor.git
+cd alphacondor
 
 # Create virtual environment
 python -m venv .venv
