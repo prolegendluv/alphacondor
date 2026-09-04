@@ -2,7 +2,7 @@
 name = "alphawheel"
 version = "0.1.0"
 description = "Autonomous AI Wheel Strategy Trading Agent for Alpaca"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<4.0.0"
 dependencies = [
     "alpaca-py>=0.33.0",
     "google-genai>=1.0.0",
